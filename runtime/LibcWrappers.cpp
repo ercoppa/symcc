@@ -30,6 +30,7 @@
 // function's result.
 
 #include <cassert>
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -607,5 +608,21 @@ uint32_t SYM(ntohl)(uint32_t netlong) {
 #endif
 
   return result;
+}
+
+// declaration required by the compiler for enabling some checks
+int SYM(sprintf)(char *str, const char *format, ...)
+    __attribute__((format(printf, 2, 3)));
+
+int SYM(sprintf)(char *str, const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  auto res = vsprintf(str, format, args);
+  if (res > 0) {
+    ReadWriteShadow destRestShadow(str, res + 1 /* terminator */);
+    std::fill(destRestShadow.begin(), destRestShadow.end(), nullptr);
+  }
+  _sym_set_return_expression(nullptr);
+  return res;
 }
 }
