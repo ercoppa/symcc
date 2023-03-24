@@ -183,14 +183,14 @@ Z3_ast _sym_build_float(double value, int is_double) {
 Z3_ast _sym_get_input_byte(size_t offset, uint8_t) {
   static std::vector<SymExpr> stdinBytes;
 
-  if (offset < stdinBytes.size())
+  if (offset < stdinBytes.size() && stdinBytes[offset])
     return stdinBytes[offset];
 
-  auto varName = "stdin" + std::to_string(stdinBytes.size());
+  auto varName = "stdin" + std::to_string(offset);
   auto *var = build_variable(varName.c_str(), 8);
 
-  stdinBytes.resize(offset);
-  stdinBytes.push_back(var);
+  stdinBytes.resize(offset + 1);
+  stdinBytes[offset] = var;
 
   return var;
 }
